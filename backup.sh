@@ -1,7 +1,9 @@
 #!/bin/bash
 
+locatie_cloud=$(pwd)
+
 PS3="Alegeti o optiune:"
-select optiune in "Cauta fisier dupa data" "Optiune 2" "Optiune 3" "Iesire"; do
+select optiune in "Cauta fisier dupa data" "Mutare fisiere" "CronJob 60 zile maintenance" "Iesire"; do
   case $optiune in
     "Cauta fisier dupa data")
     read -p "Introduceti numele directorului: " directory
@@ -51,11 +53,108 @@ select optiune in "Cauta fisier dupa data" "Optiune 2" "Optiune 3" "Iesire"; do
     echo "Fisiere mai vechi decat: $search_date in $directory:"
     find "$directory" -type f ! -newermt "$search_date" -print
     ;;
-    "Optiune 2")
-    echo "Ai selectat optiuena 2"
+    "Mutare fisiere")
+    echo "Selectati locatia: 1)Local sau in 2)Cloud"
+    read locatie
+    case "$locatie" in
+      1)
+      echo "Ati selectat Local"
+      read -p "Introduceti directorul unde doriti sa navigati:" dir_src_file
+      if [ -d $dir_src_file ]; then
+       echo "Dir-ul exista"
+       cd $dir_src_file && ls -la 
+       read -p "Introduceti numele fisierului: " nume_fisier
+       if [ -f $nume_fisier ]; then
+        read -p "Introduce destinatia fisierului pe care doriti sa i-l mutati: " dest_fisier
+            if [ -d $dest_fisier ];then
+                mv $nume_fisier $dest_fisier
+                echo "Fisierul $nume_fisier a fost mutat in $dest_fisier"
+            else 
+                echo "Fisierul destinatie nu exista"
+                continue
+            fi        
+        else
+        echo "Fisierul $nume_fisier nu se afla in acest director"
+        continue
+       fi
+      else
+       echo "Directorul in care vreti sa navigati nu exista"
+       continue
+      fi
+       ;;      
+       2)
+        echo "Ati selctat in Cloud"
+        read -p "Introduceti directorul unde doriti sa navigati:" dir_src_file
+        if [ -d $dir_src_file ]; then
+          cd $dir_src_file && ls -la
+          read -p "Introduceti numele fisierului pe care doriti sa i-l uploadati in cloud(git): " fisier_git
+          if [ -f $fisier_git ]; then
+           mv $fisier_git $locatie_cloud
+           cd $locatie_cloud
+           git add $fisier_git && git commit -m "Upload of $fisier_git" && git push
+           echo "Fisierul $fisier_git a fost uploadat cu succes in GitHub"
+          else
+           echo "Fisierul $fisier_git nu se afla in aceasta locatie"
+           continue
+          fi
+        else
+         echo "Directorul in care vreti sa navigati nu exista"
+         continue
+        fi
+        ;;
+       *)
+       echo "Optiune de mutare invalida"
+       continue
+       ;;
+    esac
     ;;
-    "Optiune 3")
-    echo "Ai selectat optiunea umarul trei"
+    "CronJob 60 zile maintenance")
+    add_cronjob() {
+  local path="$1"
+
+  if [[ ! -d "$path" ]]; then
+    echo "Directorul $path nu exista"
+    exit 1
+  fi
+
+  # Definim Cron Job-ul
+  local job="0 20 * * 1 find $path -type f -mtime +60 -delete #delete_old_files"
+
+  # Adaugam Cron Job-ul daca inca nu exista
+  if crontab -l 2>/dev/null | grep -q "#delete_old_files"; then
+    echo "Cron job-ul deja exista"
+  else
+    (crontab -l 2>/dev/null; echo "$job") | crontab -
+    echo "Cron job adaugat cu succes"
+  fi
+}
+
+
+remove_cronjob() {
+  # Stergem Cron Job-ul cu comentariul #delete_old_files
+  crontab -l 2>/dev/null | grep -v "#delete_old_files" | crontab -
+  echo "Cron job sters cu succes."
+}
+
+
+echo "Alegeti Optiune pentru CronJob de stergere a fisierlor mai vechi de 60 zile"
+echo "1.Adaugare CronJob"
+echo "2.Stergere CronJob"
+read -p "Alegeti optiune: " choice
+
+case $choice in
+  1)
+    read -p "Introduceti directorul pentru cronjob: " dir
+    add_cronjob "$dir"
+    ;;
+  2)
+    remove_cronjob
+    ;;
+  *)
+    echo "Alegere invalida"
+    continue
+    ;;
+esac
     ;;
     "Iesire")
     echo "Iesire program..."
