@@ -3,7 +3,7 @@
 locatie_cloud=$(pwd)
 
 PS3="Alegeti o optiune:"
-select optiune in "Cauta fisier dupa data" "Mutare fisiere" "CronJob 60 zile maintenance" "Iesire"; do
+select optiune in "Cauta fisier dupa data" "Mutare fisiere" "CronJob 60 zile maintenance" "Stergere fisiere" "Iesire"; do
   case $optiune in
     "Cauta fisier dupa data")
     read -p "Introduceti numele directorului: " directory
@@ -155,6 +155,23 @@ case $choice in
     continue
     ;;
 esac
+    ;;
+    "Stergere fisiere")
+    read -p "Introduceti direcotrul unde doriti sa navigati: " dir_rm
+    if [ -d $dir_rm ]; then
+     cd $dir_rm && ls -la
+     read -p "Introduceti numele fisierului pe care doriti sa il stergeti: " file_rm
+     if [ -f $file_rm ]; then
+      rm -f $file_rm
+      echo "Fisierul $file_rm a fost sters cu succes"
+     else
+     echo "Fisierul $file_rm nu se afla in aceasta locatie"
+     continue
+     fi
+    else
+     echo "Directorul in care doriti sa navigati nu exista"
+     continue
+    fi
     ;;
     "Iesire")
     echo "Iesire program..."
