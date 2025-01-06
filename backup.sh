@@ -204,18 +204,19 @@ done
 }
 
 show_usage() {
-    echo "Usage: $0 [--help] [--usage]"
+    echo "Usage: $0 [--help] [--usage] [--run]"
+    echo " --help  O scurta descriere a aplicatiei."
+    echo " --usage Arta flaguurile pe care aplicatia noastra le poate lua."
+    echo " --run   Ruleaza aplicatia."
     exit 0
 }
 
 show_help() {
     echo "Usage: $0 [OPTIONS]"
-    echo ""
-    echo "Options:"
-    echo "  --help       Show detailed help information."
-    echo "  --usage      Display a brief usage message."
-    echo "  --run        Run App"    
-    echo ""
+    echo "Optiuni posibile: [--help] [--usage] [--run] "
+    echo "Detalii folosire: ./backup --usage"
+    echo "Acest script ofera o interfata utizatorului ce-i permite executarea unor operatti simple de modificiare a fisierlelor si upload in GitHub"
+    echo "C: Darius Groza"
     exit 0
 }
 
@@ -228,8 +229,8 @@ while getopts "::-:" opt; do
             show_usage
             ;;
         run)
-         aplicatie
-         ;;
+            aplicatie
+            ;;
         *)
             echo "Invalid option: --${OPTARG}"
             show_usage
