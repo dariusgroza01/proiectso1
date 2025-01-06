@@ -2,8 +2,9 @@
 
 locatie_cloud=$(pwd)
 
-PS3="Alegeti o optiune:"
-select optiune in "Cauta fisier dupa data" "Mutare fisiere" "CronJob 60 zile maintenance" "Stergere fisiere" "Iesire"; do
+aplicatie (){
+PS3="Alegeti o optiune: "
+select optiune in "Cauta fisier dupa data" "Mutare fisiere" "CronJob 60 zile maintenance" "Stergere fisiere" "Redenumire Fisiere" "Iesire" ; do
   case $optiune in
     "Cauta fisier dupa data")
     read -p "Introduceti numele directorului: " directory
@@ -21,7 +22,7 @@ select optiune in "Cauta fisier dupa data" "Mutare fisiere" "CronJob 60 zile mai
 
     # Validam ca sirul de caractere pana la ultimul carcter sunt numere
     if ! [[ "$numar_unitati" =~ ^[0-9]+$ ]]; then
-        echo "Error: Invalid relative time format. Use <number>d, <number>w, or <number>m."
+        echo "Format time relevant incorect! Folositi: 'd' pentru zile, 'w' pentru saptamani sau 'm' pentru luni."
         exit 1
     fi
 
@@ -173,6 +174,24 @@ esac
      continue
     fi
     ;;
+    "Redenumire Fisiere")
+    read -p "Introduceti directorul in care doriti sa navigati: " red_dir
+    if [ -d $red_dir ]; then
+     cd $red_dir && ls -la 
+     read -p "Introduceti numele fisierului pe care doriti sa i-l redenumiti: " ol_name
+     if [ -f $ol_name ]; then
+      read -p "Introduceti noul nume al fisierului: " nw_name
+      mv $red_dir/$ol_name $red_dir/$nw_name
+      echo "Numele fisierului $ol_name a fost updatat la $nw_name"
+     else
+      echo "Fisierul pe care doriti sa i-l redenumiti nu se afla aici"
+      continue
+     fi
+    else
+    echo "Directorul in care doriti sa navigati nu exista"
+     continue
+    fi
+    ;;
     "Iesire")
     echo "Iesire program..."
     exit
@@ -181,4 +200,39 @@ esac
     echo "Optiune invalida"
     ;;
   esac
+done
+}
+
+show_usage() {
+    echo "Usage: $0 [--help] [--usage]"
+    exit 0
+}
+
+show_help() {
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --help       Show detailed help information."
+    echo "  --usage      Display a brief usage message."
+    echo "  --run        Run App"    
+    echo ""
+    exit 0
+}
+
+while getopts "::-:" opt; do
+    case "${OPTARG}" in
+        help)
+            show_help
+            ;;
+        usage)
+            show_usage
+            ;;
+        run)
+         aplicatie
+         ;;
+        *)
+            echo "Invalid option: --${OPTARG}"
+            show_usage
+            ;;
+    esac
 done
