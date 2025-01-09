@@ -92,7 +92,9 @@ select optiune in "Cauta fisier dupa data" "Mutare fisiere" "CronJob 60 zile mai
           if [ -f $fisier_git ]; then
            mv $fisier_git $locatie_cloud
            cd $locatie_cloud
-           git add $fisier_git && git commit -m "Upload of $fisier_git" && git push
+           git add $fisier_git 
+           git commit -m "Upload of $fisier_git" 
+           git push
            echo "Fisierul $fisier_git a fost uploadat cu succes in GitHub"
           else
            echo "Fisierul $fisier_git nu se afla in aceasta locatie"
